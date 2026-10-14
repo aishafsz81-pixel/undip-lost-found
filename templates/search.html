@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Cari Barang — UNDIP Lost &amp; Found{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <div class="content-width"><span class="eyebrow">TEMUKAN YANG KAMU CARI</span><h1>Cari barang</h1><p>Gunakan kata kunci atau filter untuk menemukan laporan yang sesuai.</p></div>
+</section>
+<section class="content-width page-content">
+    <form class="filter-panel" action="{{ url_for('search') }}" method="get">
+        <div class="filter-search"><label for="search-q">Kata kunci</label><input id="search-q" type="search" name="q" value="{{ keyword }}" placeholder="Nama atau ciri barang"></div>
+        <div><label for="search-category">Kategori</label><select id="search-category" name="kategori"><option value="">Semua kategori</option>{% for category in categories %}<option value="{{ category }}" {{ 'selected' if selected_category == category else '' }}>{{ category }}</option>{% endfor %}</select></div>
+        <div><label for="search-location">Lokasi</label><input id="search-location" type="text" name="lokasi" value="{{ selected_location }}" placeholder="Ketik lokasi, contoh: Perpustakaan"></div>
+        <div><label for="search-status">Status</label><select id="search-status" name="status"><option value="">Semua status</option>{% for status in filter_statuses %}<option value="{{ status }}" {{ 'selected' if selected_status == status else '' }}>{{ status }}</option>{% endfor %}</select></div>
+        <div class="filter-actions"><button class="button button-primary" type="submit">Terapkan filter</button><a class="button button-light" href="{{ url_for('search') }}">Reset</a></div>
+    </form>
+    <div class="results-heading"><h2>Hasil laporan</h2><span>{{ reports|length }} laporan ditemukan · urut terbaru</span></div>
+    {% if reports %}<div class="report-grid">{% for report in reports %}{% include "_report_card.html" %}{% endfor %}</div>
+    {% else %}<div class="empty-state"><span>🔍</span><h3>Belum ada barang yang cocok</h3><p>Coba kata kunci atau filter lain. Kamu juga bisa membuat laporan baru.</p><a class="button button-primary" href="{{ url_for('report_form') }}">Buat laporan</a></div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ report.name }} — UNDIP Lost &amp; Found{% endblock %}
+{% block content %}
+<section class="content-width detail-page">
+    <a class="back-link" href="{{ url_for('search') }}">← Kembali ke pencarian</a>
+    <div class="detail-grid">
+        <div class="detail-photo">
+            {% if report.photo_filename %}<img src="{{ url_for('static', filename='uploads/' ~ report.photo_filename) }}" alt="Foto {{ report.name }}">
+            {% elif report.video_filename %}<span aria-hidden="true">🎥</span>
+            {% else %}<span aria-hidden="true">{{ {'Elektronik': '🎧', 'Kartu Identitas': '🪪', 'Aksesori': '👛', 'Alat Tulis': '✏️', 'Tas': '🎒', 'Lainnya': '🧴'}.get(report.category, '📦') }}</span>{% endif %}
+            {% if report.is_demo %}<span class="demo-chip">DATA DEMO</span>{% endif %}
+        </div>
+        <article class="detail-content">
+            <div class="card-kicker"><span class="type-chip {{ 'type-lost' if report.report_type == 'Hilang' else 'type-found' }}">{{ report.report_type }}</span><span class="category-text">{{ report.category }}</span><span class="status-chip status-{{ 'returned' if report.status == 'Sudah Kembali ke Pemilik' else 'progress' if report.status == 'Proses Klaim' else 'open' }}">{{ report.status }}</span></div>
+            <h1>{{ report.name }}</h1>
+            {% if report.video_filename %}<video class="report-video-detail" controls preload="metadata" aria-label="Video {{ report.name }}"><source src="{{ url_for('static', filename='uploads/' ~ report.video_filename) }}">Browser kamu tidak mendukung pemutaran video.</video>{% endif %}
+            <p class="detail-description">{{ report.description }}</p>
+            <div class="detail-facts"><div><span>⌖</span><div><small>Lokasi</small><strong>{{ report.location }}</strong></div></div><div><span>◷</span><div><small>Tanggal kejadian</small><strong>{{ format_date_id(report.incident_date) }}</strong></div></div><div><span>♙</span><div><small>Nama pelapor</small><strong>{{ report.reporter_name }}</strong></div></div></div>
+            <div class="privacy-note">🔒 Kontak pribadi pelapor tidak ditampilkan. Gunakan formulir di bawah untuk mengirim pesan.</div>
+            {% if report.status != 'Sudah Kembali ke Pemilik' %}
+                {% if report.is_demo or report.owner_id == 'undip-demo-user' %}
+                <div class="privacy-note">Data demonstrasi · Interaksi pada laporan contoh tidak dikirim ke pemilik sungguhan.</div>
+                {% elif current_user and report.owner_id == current_user.id|string %}
+                <div class="returned-note">Ini laporan yang kamu buat. Kamu dapat mengelolanya dari halaman <a href="{{ url_for('my_reports') }}">Laporan Saya</a>.</div>
+                {% else %}
+                {% if report.report_type == 'Ditemukan' %}
+                {% if current_user %}<details class="action-details"><summary class="button button-primary">Saya merasa ini barang saya</summary><form class="inline-form" method="post" action="{{ url_for('submit_claim', report_id=report.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><h3>Ajukan klaim barang</h3><p>Ceritakan ciri yang dapat membantu verifikasi. Pengajuan tidak otomatis menyelesaikan laporan.</p><label>Nama<input name="nama" required maxlength="100" value="{{ current_user.name }}"></label><label>Kontak<input name="kontak" type="email" required maxlength="254" value="{{ current_user.email }}"></label><label>Informasi pendukung<textarea name="pesan" rows="3" required maxlength="1000" placeholder="Sebutkan ciri yang tidak tertulis di laporan atau waktu pengambilan."></textarea></label><button class="button button-primary" type="submit">Kirim pengajuan</button></form></details>
+                {% else %}<a class="button button-primary auth-required" href="{{ url_for('login', next=request.path) }}">Masuk untuk mengajukan klaim</a>{% endif %}
+                {% else %}
+                {% if current_user %}<details class="action-details"><summary class="button button-primary">Saya menemukan barang ini</summary><form class="inline-form" method="post" action="{{ url_for('submit_claim', report_id=report.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><h3>Hubungi pelapor</h3><p>Bagikan informasi penemuan agar pelapor dapat menindaklanjuti.</p><label>Nama<input name="nama" required maxlength="100" value="{{ current_user.name }}"></label><label>Kontak<input name="kontak" type="email" required maxlength="254" value="{{ current_user.email }}"></label><label>Informasi penemuan<textarea name="pesan" rows="3" required maxlength="1000" placeholder="Di mana dan kapan barang ditemukan?"></textarea></label><button class="button button-primary" type="submit">Kirim informasi</button></form></details>
+                {% else %}<a class="button button-primary auth-required" href="{{ url_for('login', next=request.path) }}">Masuk untuk memberi informasi</a>{% endif %}
+                {% endif %}
+                {% if current_user and report.owner_id != current_user.id|string %}<details class="action-details"><summary class="button button-light">Kirim pesan kepada pelapor</summary><form class="inline-form" method="post" action="{{ url_for('contact_reporter', report_id=report.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><h3>Pesan untuk pelapor</h3><label>Nama<input name="nama" required maxlength="100" value="{{ current_user.name }}"></label><label>Kontak untuk dibalas<input name="kontak" type="email" required maxlength="254" value="{{ current_user.email }}"></label><label>Pesan<textarea name="pesan" rows="3" required maxlength="1000"></textarea></label><button class="button button-primary" type="submit">Kirim pesan</button></form></details>{% elif not current_user %}<a class="button button-light auth-required" href="{{ url_for('login', next=request.path) }}">Masuk untuk menghubungi pelapor</a>{% endif %}
+                {% endif %}
+            {% else %}<div class="returned-note">✓ Laporan ini telah dikonfirmasi kembali kepada pemilik.</div>{% endif %}
+        </article>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+<article class="report-card">
+    <a class="card-image" href="{{ url_for('report_detail', report_id=report.id) }}" aria-label="Lihat detail {{ report.name }}">
+        {% if report.photo_filename %}
+        <img src="{{ url_for('static', filename='uploads/' ~ report.photo_filename) }}" alt="Foto {{ report.name }}">
+        {% elif report.video_filename %}
+        <video class="card-video-preview" muted playsinline preload="metadata" aria-label="Pratinjau video {{ report.name }}"><source src="{{ url_for('static', filename='uploads/' ~ report.video_filename) }}">Video barang</video><span class="card-video-label">VIDEO</span>
+        {% else %}
+        <span aria-hidden="true">{{ {'Elektronik': '🎧', 'Kartu Identitas': '🪪', 'Aksesori': '👛', 'Alat Tulis': '✏️', 'Tas': '🎒', 'Lainnya': '🧴'}.get(report.category, '📦') }}</span>
+        {% endif %}
+        {% if report.is_demo %}<span class="demo-chip">DEMO</span>{% endif %}
+    </a>
+    <div class="card-content">
+        <div class="card-kicker">
+            <span class="type-chip {{ 'type-lost' if report.report_type == 'Hilang' else 'type-found' }}">{{ report.report_type }}</span>
+            <span class="category-text">{{ report.category }}</span>
+        </div>
+        <h3><a href="{{ url_for('report_detail', report_id=report.id) }}">{{ report.name }}</a></h3>
+        <p class="card-location"><span aria-hidden="true">⌖</span> {{ report.location }}</p>
+        <div class="card-bottom">
+            <span>{{ format_date_id(report.incident_date) }}</span>
+            <span class="status-chip status-{{ 'returned' if report.status == 'Sudah Kembali ke Pemilik' else 'progress' if report.status == 'Proses Klaim' else 'open' }}">{{ report.status }}</span>
+        </div>
+    </div>
+</article>

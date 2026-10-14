@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% set registering = mode == 'register' %}
+{% block title %}{{ 'Buat Akun' if registering else 'Masuk' }} — UNDIP Lost &amp; Found{% endblock %}
+{% block content %}
+<section class="auth-page">
+    <div class="auth-card">
+        <a class="back-link" href="{{ url_for('index') }}">← Kembali ke beranda</a>
+        <span class="eyebrow">{{ 'GABUNG DENGAN KOMUNITAS' if registering else 'SELAMAT DATANG KEMBALI' }}</span>
+        <h1>{{ 'Buat akun' if registering else 'Masuk ke akun' }}</h1>
+        <p class="auth-intro">{{ 'Daftar agar kamu bisa membuat dan mengelola laporan barang.' if registering else 'Masuk untuk mengelola laporan dan menghubungi pelapor.' }}</p>
+        <form method="post" class="auth-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if not registering %}<input type="hidden" name="next" value="{{ request.args.get('next', '') }}">{% endif %}
+            {% if registering %}
+            <label>Nama lengkap<input name="nama" type="text" required maxlength="100" autocomplete="name" value="{{ form_data.get('nama', '') }}" placeholder="Nama kamu"></label>
+            {% endif %}
+            <label>Email<input name="email" type="email" required maxlength="254" autocomplete="email" value="{{ form_data.get('email', '') }}" placeholder="nama@email.com"></label>
+            <label>Kata sandi<input name="password" type="password" required minlength="8" autocomplete="{{ 'new-password' if registering else 'current-password' }}" placeholder="{{ 'Minimal 8 karakter' if registering else 'Masukkan kata sandi' }}"></label>
+            <button class="button button-primary auth-submit" type="submit">{{ 'Buat akun' if registering else 'Masuk' }} <span aria-hidden="true">→</span></button>
+        </form>
+        <p class="auth-switch">{{ 'Sudah punya akun?' if registering else 'Belum punya akun?' }} <a href="{{ url_for('login' if registering else 'register', next=request.args.get('next', '')) }}">{{ 'Masuk' if registering else 'Daftar' }}</a></p>
+        <p class="auth-privacy">Website ini demonstrasi mahasiswa yang dipublikasikan. Gunakan kata sandi berbeda dari akun pentingmu.</p>
+    </div>
+</section>
+{% endblock %}

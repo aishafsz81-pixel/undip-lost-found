@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Laporan Saya — UNDIP Lost &amp; Found{% endblock %}
+{% block content %}
+<section class="page-heading"><div class="content-width"><span class="eyebrow">DASHBOARD AKUN</span><h1>Laporan Saya</h1><p>Laporan dan pesan yang terkait dengan akun <strong>{{ current_user.name }}</strong>.</p></div></section>
+<section class="content-width page-content">
+    <div class="results-heading"><h2>Laporan yang dibuat</h2><a class="button button-primary button-small" href="{{ url_for('report_form') }}">＋ Buat laporan</a></div>
+    {% if reports %}<div class="dashboard-list">
+        {% for report in reports %}<article class="dashboard-row"><div class="mini-report-icon">{{ '🔍' if report.report_type == 'Hilang' else '🎒' }}</div><div class="dashboard-report-info"><a href="{{ url_for('report_detail', report_id=report.id) }}"><strong>{{ report.name }}</strong></a><span>{{ report.report_type }} · {{ report.location }} · {{ format_date_id(report.incident_date) }}</span><span class="status-chip status-{{ 'returned' if report.status == 'Sudah Kembali ke Pemilik' else 'progress' if report.status == 'Proses Klaim' else 'open' }}">{{ report.status }}</span></div><div class="dashboard-actions">
+            <a class="button button-light button-small" href="{{ url_for('report_form', report_id=report.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('delete_report', report_id=report.id) }}" onsubmit="return confirm('Hapus laporan ini? Tindakan ini tidak dapat dibatalkan.');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="button button-danger button-small" type="submit">Hapus</button></form>
+            {% if report.status == 'Proses Klaim' %}<form class="confirm-form" method="post" action="{{ url_for('confirm_return', report_id=report.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label><input type="checkbox" name="konfirmasi" value="yes" required> Saya mengonfirmasi barang telah diterima pemilik.</label><button class="button button-primary button-small" type="submit">Tandai kembali</button></form>{% endif %}
+        </div></article>{% endfor %}
+    </div>{% else %}<div class="empty-state"><span>📋</span><h3>Belum ada laporan</h3><p>Laporan yang kamu buat akan terlihat di halaman ini.</p><a class="button button-primary" href="{{ url_for('report_form') }}">Buat laporan</a></div>{% endif %}
+    {% if claims %}<section class="inbox-section"><div class="results-heading"><h2>Pengajuan klaim / informasi</h2></div>{% for claim in claims %}<article class="inbox-card"><strong>{{ claim.report_name }} · {{ claim.claimant_name }}</strong><p>{{ claim.message }}</p><small>Kontak pengaju: {{ claim.claimant_contact }}</small></article>{% endfor %}</section>{% endif %}
+    {% if messages %}<section class="inbox-section"><div class="results-heading"><h2>Pesan masuk</h2></div>{% for message in messages %}<article class="inbox-card"><strong>{{ message.report_name }} · {{ message.sender_name }}</strong><p>{{ message.message }}</p><small>Kontak untuk membalas: {{ message.sender_contact }}</small></article>{% endfor %}</section>{% endif %}
+</section>
+{% endblock %}

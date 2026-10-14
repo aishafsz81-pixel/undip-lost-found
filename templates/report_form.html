@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% set editing = report is not none %}
+{% block title %}{{ 'Edit Laporan' if editing else 'Laporkan Barang' }} — UNDIP Lost &amp; Found{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <div class="content-width"><span class="eyebrow">BERSAMA BANTU BARANG KEMBALI</span><h1>{{ 'Edit laporan' if editing else 'Buat laporan barang' }}</h1><p>Isi informasi yang diperlukan. Kontak pelapor hanya digunakan untuk komunikasi dan tidak ditampilkan secara publik.</p></div>
+</section>
+<section class="content-width form-layout">
+    <form class="form-card" method="post" enctype="multipart/form-data" data-has-media="{{ 'true' if editing and (report.photo_filename or report.video_filename) else 'false' }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-section-title"><span class="step-icon small">✍️</span><div><h2>Informasi barang</h2><p>Kolom bertanda * wajib diisi.</p></div></div>
+        <div class="field"><label for="jenis">Jenis laporan <span>*</span></label><div class="radio-options">
+            {% for jenis in ('Hilang', 'Ditemukan') %}<label class="radio-card"><input type="radio" name="jenis" value="{{ jenis }}" required {{ 'checked' if form_data.get('jenis', report.report_type if report else '') == jenis else '' }}><span>{{ '🔍' if jenis == 'Hilang' else '🎒' }} {{ jenis }}</span></label>{% endfor %}
+        </div></div>
+        <div class="form-row">
+            <div class="field"><label for="nama-barang">Nama barang <span>*</span></label><input id="nama-barang" name="nama_barang" required maxlength="100" value="{{ form_data.get('nama_barang', report.name if report else '') }}" placeholder="Contoh: Tumbler biru navy"></div>
+            <div class="field"><label for="kategori">Kategori <span>*</span></label><select id="kategori" name="kategori" required><option value="">Pilih kategori</option>{% for category in categories %}<option value="{{ category }}" {{ 'selected' if form_data.get('kategori', report.category if report else '') == category else '' }}>{{ category }}</option>{% endfor %}</select></div>
+        </div>
+        <div class="field"><label for="deskripsi">Deskripsi atau ciri-ciri <span>*</span></label><textarea id="deskripsi" name="deskripsi" rows="4" required maxlength="1200" placeholder="Warna, bentuk, tanda khusus, atau ciri lain. Jangan tulis nomor identitas lengkap.">{{ form_data.get('deskripsi', report.description if report else '') }}</textarea></div>
+        <div class="form-row">
+            <div class="field"><label for="lokasi">Lokasi kehilangan atau penemuan <span>*</span></label><input id="lokasi" name="lokasi" required maxlength="150" value="{{ form_data.get('lokasi', report.location if report else '') }}" placeholder="Contoh: Perpustakaan Widya Puraya"></div>
+            <div class="field"><label for="tanggal">Tanggal kejadian <span>*</span></label><input id="tanggal" type="date" name="tanggal" required value="{{ form_data.get('tanggal', report.incident_date if report else '') }}"></div>
+        </div>
+        <div class="field media-required-field">
+            <label>Foto/video barang <span class="required-marker">* Wajib</span></label>
+            <p class="media-required-note">Pilih minimal satu: unggah foto atau video. Keduanya juga boleh diunggah.</p>
+            <div class="form-row">
+                <div class="field"><label for="foto">Foto barang <span class="media-format-note">JPG, PNG, WEBP · maks. 4 MB</span></label><input id="foto" type="file" name="foto" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">{% if editing and report.photo_filename %}<small>Foto saat ini tersimpan. Pilih file baru untuk menggantinya.</small>{% endif %}</div>
+                <div class="field"><label for="video">Video barang <span class="media-format-note">MP4, WEBM · maks. 12 MB</span></label><input id="video" type="file" name="video" accept=".mp4,.webm,video/mp4,video/webm">{% if editing and report.video_filename %}<small>Video saat ini tersimpan. Pilih file baru untuk menggantinya.</small>{% endif %}</div>
+            </div>
+        </div>
+        <small>Media akan ditampilkan bersama laporan dan dapat dilihat pengunjung.</small>
+        <hr>
+        <div class="form-section-title"><span class="step-icon small">👤</span><div><h2>Informasi pelapor</h2><p>Kontak pribadi hanya dibagikan melalui fitur pesan.</p></div></div>
+        <div class="form-row">
+            <div class="field"><label for="nama-pelapor">Nama pelapor <span>*</span></label><input id="nama-pelapor" name="nama_pelapor" required maxlength="100" value="{{ form_data.get('nama_pelapor', report.reporter_name if report else '') }}" placeholder="Nama panggilan"></div>
+            <div class="field"><label for="kontak-pelapor">Kontak pelapor <span>*</span></label><input id="kontak-pelapor" name="kontak_pelapor" required maxlength="150" value="{{ form_data.get('kontak_pelapor', report.reporter_contact if report else '') }}" placeholder="Email atau nomor yang bisa dihubungi"><small>Kontak tidak akan ditampilkan secara terbuka.</small></div>
+        </div>
+        <div class="form-actions"><a class="button button-light" href="{{ url_for('my_reports') if editing else url_for('index') }}">Batal</a><button class="button button-primary" type="submit">{{ 'Simpan perubahan' if editing else 'Kirim laporan' }} <span aria-hidden="true">→</span></button></div>
+    </form>
+    <aside class="privacy-card"><span class="privacy-icon">🛡️</span><h3>Jaga informasi pribadi</h3><p>Jangan unggah kata sandi, nomor identitas lengkap, alamat rumah, atau data pribadi yang tidak diperlukan.</p><a href="{{ url_for('about') }}">Baca panduan keamanan →</a></aside>
+</section>
+<script>
+    document.querySelector(".form-card").addEventListener("submit", function (event) {
+        const hasExistingMedia = this.dataset.hasMedia === "true";
+        const hasNewMedia = document.querySelector("#foto").files.length > 0
+            || document.querySelector("#video").files.length > 0;
+        if (!hasExistingMedia && !hasNewMedia) {
+            event.preventDefault();
+            alert("Foto/video barang wajib diunggah. Pilih minimal satu: foto atau video.");
+            document.querySelector("#foto").focus();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Beranda — UNDIP Lost &amp; Found{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-copy">
+            <span class="eyebrow"><span class="eyebrow-dot"></span> Ruang temu untuk sivitas UNDIP</span>
+            <h1>Barang Hilang?<br><span>Temukan Kembali</span> di Sini.</h1>
+            <p>Tempat sederhana untuk melaporkan barang hilang atau barang yang ditemukan di lingkungan kampus. Semoga segera kembali ke pemiliknya.</p>
+            <div class="hero-actions">
+                <a class="button button-primary" href="{{ url_for('search') }}">Cari Barang <span aria-hidden="true">→</span></a>
+                <a class="button button-outline" href="{{ url_for('report_form') }}">＋ Laporkan Barang</a>
+            </div>
+            <form class="quick-search" action="{{ url_for('search') }}" method="get">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <label class="visually-hidden" for="quick-q">Cari nama barang atau lokasi</label>
+                <input id="quick-q" type="search" name="q" placeholder="Cari barang, misalnya tumbler biru...">
+                <button type="submit">Cari</button>
+            </form>
+            <span class="hero-hint">Telusuri laporan dari berbagai area kampus</span>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+            <div class="art-glow"></div>
+            <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+            <div class="art-center"><span>🔎</span></div>
+            <div class="floating-item item-wallet">👛</div>
+            <div class="floating-item item-bottle">🧴</div>
+            <div class="floating-item item-keys">🔑</div>
+            <div class="art-caption"><span class="caption-check">✓</span><span><strong>Dipertemukan kembali</strong><small>Dimulai dari satu laporan</small></span></div>
+        </div>
+    </div>
+</section>
+<div class="demo-banner"><span>✦</span> Data awal merupakan data demonstrasi, bukan laporan kejadian nyata.</div>
+<section class="stats-section content-width" aria-label="Statistik laporan">
+    <div class="stat-card"><span class="stat-icon icon-blue">⌕</span><div><strong>{{ stats.lost }}</strong><span>Barang dilaporkan hilang</span></div></div>
+    <div class="stat-card"><span class="stat-icon icon-green">✓</span><div><strong>{{ stats.found }}</strong><span>Barang ditemukan</span></div></div>
+    <div class="stat-card"><span class="stat-icon icon-gold">↗</span><div><strong>{{ stats.returned }}</strong><span>Telah kembali ke pemilik</span></div></div>
+</section>
+<p class="content-width stat-note">Jumlah laporan mencakup data DEMO; pengembalian hanya menghitung laporan nyata yang dikonfirmasi.</p>
+<section class="section content-width">
+    <div class="section-heading">
+        <div><span class="eyebrow">BANTU TEMUKAN PEMILIKNYA</span><h2>Laporan terbaru</h2><p>Lihat barang yang baru dilaporkan oleh sivitas kampus.</p></div>
+        <a class="text-link" href="{{ url_for('search') }}">Lihat semua laporan <span aria-hidden="true">→</span></a>
+    </div>
+    {% if reports %}
+    <div class="report-grid">{% for report in reports %}{% include "_report_card.html" %}{% endfor %}</div>
+    {% else %}<div class="empty-state"><span>📭</span><h3>Belum ada laporan</h3><p>Jadilah yang pertama membuat laporan barang.</p><a class="button button-primary" href="{{ url_for('report_form') }}">Buat laporan</a></div>{% endif %}
+</section>
+<section class="steps-section">
+    <div class="content-width">
+        <div class="section-heading centered"><div><span class="eyebrow">MUDAH DAN PRAKTIS</span><h2>Tiga langkah sederhana</h2><p>Bersama, kita bantu barang menemukan jalan pulang.</p></div></div>
+        <div class="steps-grid">
+            <div class="step-card"><span class="step-number">01</span><span class="step-icon">📋</span><h3>Buat laporan</h3><p>Ceritakan barang yang hilang atau ditemukan beserta lokasi dan cirinya.</p></div>
+            <div class="step-card"><span class="step-number">02</span><span class="step-icon">🔎</span><h3>Cari dan hubungi</h3><p>Telusuri laporan dan kirim pesan kepada pelapor tanpa membuka kontak publik.</p></div>
+            <div class="step-card"><span class="step-number">03</span><span class="step-icon">🤝</span><h3>Konfirmasi kembali</h3><p>Setelah barang diterima, konfirmasikan pengembalian melalui laporan.</p></div>
+        </div>
+    </div>
+</section>
+<section class="closing-cta content-width"><div><span class="eyebrow">BARANGMU MUNGKIN SEDANG DICARI</span><h2>Temukan atau bantu barang kembali.</h2><p>Setiap laporan kecil bisa sangat berarti bagi pemiliknya.</p></div><a class="button button-primary" href="{{ url_for('report_form') }}">Laporkan Barang <span aria-hidden="true">→</span></a></section>
+{% endblock %}

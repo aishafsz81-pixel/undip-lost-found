@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#102d4e">
+    <title>{% block title %}UNDIP Lost &amp; Found{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav-wrap" aria-label="Navigasi utama">
+            <a class="brand" href="{{ url_for('index') }}" aria-label="UNDIP Lost & Found, beranda">
+                <span class="brand-mark">U</span>
+                <span>UNDIP <strong>Lost &amp; Found</strong></span>
+            </a>
+            <div class="nav-links">
+                <a class="{{ 'active' if request.endpoint == 'index' else '' }}" href="{{ url_for('index') }}">Beranda</a>
+                <a class="{{ 'active' if request.endpoint == 'search' else '' }}" href="{{ url_for('search') }}">Cari Barang</a>
+                <a class="{{ 'active' if request.endpoint == 'report_form' else '' }}" href="{{ url_for('report_form') }}">Buat Laporan</a>
+                <a class="{{ 'active' if request.endpoint == 'my_reports' else '' }}" href="{{ url_for('my_reports') }}">Laporan Saya</a>
+                <a class="{{ 'active' if request.endpoint == 'about' else '' }}" href="{{ url_for('about') }}">Tentang</a>
+            </div>
+            <div class="account-links">
+                {% if current_user %}
+                <span class="account-name">{{ current_user.name }}</span>
+                <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="account-button" type="submit">Keluar</button></form>
+                {% else %}
+                <a class="account-button" href="{{ url_for('login') }}">Masuk</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-stack" role="status" aria-live="polite">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span>UNDIP Lost &amp; Found <span class="muted">· Proyek demonstrasi mahasiswa</span></span>
+            <a href="{{ url_for('about') }}">Tentang &amp; panduan keamanan</a>
+        </div>
+        <p class="footer-note">Bukan layanan resmi UNDIP. Data contoh diberi label DEMO.</p>
+    </footer>
+</body>
+</html>
